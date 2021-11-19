@@ -5,10 +5,7 @@ const { promisify } = require('util');
 const genericPool = require('generic-pool');
 // use graalvm js invoke
 const DriverManager = Java.type('java.sql.DriverManager')
-const Connection = Java.type('java.sql.Connection');
-const DatabaseMetaData = Java.type('java.sql.DatabaseMetaData');
 const SupportedDrivers = require('./supported-drivers');
-
 
 const initClassPath = (customClassPath) => {
   // use graalvm method
@@ -16,12 +13,6 @@ const initClassPath = (customClassPath) => {
 };
 
 const applyParams = (query, params) => SqlString.format(query, params);
-
-// promisify Connection methods
-Connection.prototype.getMetaData = promisify(Connection.prototype.getMetaData);
-// promisify DatabaseMetaData methods
-DatabaseMetaData.prototype.getSchemas = promisify(DatabaseMetaData.prototype.getSchemas);
-DatabaseMetaData.prototype.getTables = promisify(DatabaseMetaData.prototype.getTables);
 
 module.exports = class JDBCDriver extends BaseDriver {
   /**
@@ -59,15 +50,12 @@ module.exports = class JDBCDriver extends BaseDriver {
           /** @protected */
           this.jdbcProps = this.getJdbcProperties();
         }
-
-        const getConnection = promisify(DriverManager.getConnection.bind(DriverManager));
-        return new Connection(await getConnection(this.config.url, this.jdbcProps));
+        return DriverManager.getConnection(this.config.url, this.jdbcProps)
       },
-      destroy: async (connection) => promisify(connection.close.bind(connection)),
+      destroy: async (connection) => {connection.close()},
       validate: (connection) => {
-        const isValid = promisify(connection.isValid.bind(connection));
         try {
-          return isValid(this.testConnectionTimeout() / 1000);
+          return connection.isValid(this.testConnectionTimeout() / 1000);
         } catch (e) {
           return false;
         }
@@ -167,7 +155,7 @@ module.exports = class JDBCDriver extends BaseDriver {
       }
     } catch (ex) {
       if (ex.cause) {
-        throw new Error(ex.cause.getMessageSync());
+        throw new Error(ex.cause.getMessage());
       } else {
         throw ex;
       }
@@ -178,15 +166,12 @@ module.exports = class JDBCDriver extends BaseDriver {
    * @protected
    */
   async executeStatement(conn, query, cancelObj) {
-    const createStatementAsync = promisify(conn.createStatement.bind(conn));
-    const statement = await createStatementAsync();
+    const statement =  conn.createStatement();
     if (cancelObj) {
       cancelObj.cancel = promisify(statement.cancel.bind(statement));
     }
-    const setQueryTimeout = promisify(statement.setQueryTimeout.bind(statement));
-    await setQueryTimeout(600);
-    const executeQueryAsync = promisify(statement.execute.bind(statement));
-    const resultSet = await executeQueryAsync(query);
+    statement.setQueryTimeout(600);
+    const resultSet =  statement.executeQuery(query);
     const toObjArrayAsync =
       resultSet.toObjArray && promisify(resultSet.toObjArray.bind(resultSet)) ||
       (() => Promise.resolve(resultSet));
