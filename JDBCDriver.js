@@ -149,7 +149,7 @@ module.exports = class JDBCDriver extends BaseDriver {
         for (let i = 0; i < prepareConnectionQueries.length; i++) {
           await this.executeStatement(conn, prepareConnectionQueries[i]);
         }
-        return await this.executeStatement(conn, query, cancelObj);
+        return  this.executeStatement(conn, query, cancelObj);
       } finally {
         await this.pool.release(conn);
       }
