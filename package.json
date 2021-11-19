@@ -1,0 +1,30 @@
+{
+  "name": "@dalongrong/cubejs-graalvm-jdbc-driver",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "rong fengliang <1141591465@qq.com>",
+  "description": "Cube.js jdbc database driver",
+  "public": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rongfengliang/cubejs-graalvm-jdbc-driver"
+  },
+  "engines": {
+    "node": ">=10.8.0"
+  },
+  "dependencies": {
+    "@cubejs-backend/query-orchestrator": "^0.28.56",
+    "@cubejs-backend/schema-compiler": "^0.28.58",
+    "@cubejs-backend/shared": "^0.28.55"
+  },
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@cubejs-backend/linter": "^0.28.22"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
+  "scripts": {
+    "p": "yarn publish --access public"
+  }
+}
