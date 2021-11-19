@@ -18,7 +18,7 @@ const initClassPath = (customClassPath) => {
 const applyParams = (query, params) => SqlString.format(query, params);
 
 // promisify Connection methods
-Connection.prototype.getMetaDataAsync = promisify(Connection.prototype.getMetaData);
+Connection.prototype.getMetaData = promisify(Connection.prototype.getMetaData);
 // promisify DatabaseMetaData methods
 DatabaseMetaData.prototype.getSchemas = promisify(DatabaseMetaData.prototype.getSchemas);
 DatabaseMetaData.prototype.getTables = promisify(DatabaseMetaData.prototype.getTables);
